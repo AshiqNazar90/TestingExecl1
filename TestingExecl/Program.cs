@@ -132,6 +132,13 @@ namespace TestingExecl
                 workSheet1.Cells[row1, "C"] = stud.Qualification;
                 workSheet1.Cells[row1, "D"] = stud.Height;
             }
+            // style setting for student
+
+            workSheet1.Range["A1","D1"].Interior.Color = XlRgbColor.rgbDeepPink;
+            workSheet1.Cells.Range["A2:A6"].Font.Color = XlRgbColor.rgbDarkGreen;
+            workSheet1.Cells.Range["C2:C6"].Font.Color = XlRgbColor.rgbDarkRed;
+          
+            workSheet1.Columns["A:D"].AutoFit();
             return row1;
         }
     }
