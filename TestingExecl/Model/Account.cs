@@ -42,7 +42,6 @@ namespace TestingExecl.Model
                 new Account {Code ="008",Name="Appu",Description="Trainee",CreatedBy=2021,ModifiedBy=2022,EventName="Transaction",Location="India",Load=347.22,BasicSalary=19000,HRA=250,Expense=3000,Comments="no comments"},
                 new Account {Code ="009",Name="Ravi",Description="QA",CreatedBy=2021,ModifiedBy=2022,EventName="Transaction",Location="Kuwait",Load=1.90,BasicSalary=17000,HRA=540,Expense=2000,Comments="Disabled"},
                 new Account {Code ="010",Name="Lahiz",Description="Traniee",CreatedBy=2021,ModifiedBy=2022,EventName="Transaction",Location="India",Load=10.89,BasicSalary=10000,HRA=6500,Expense=18000,Comments="Pan Requested"}
-
         };
             return TestAccounts;
         }

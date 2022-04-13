@@ -16,7 +16,7 @@ namespace TestingExecl
             Account accounts = new Account();
             Student students = new Student();
             // Display the list in an Excel spreadsheet.
-            DisplayInExcel(accounts.GetData(),students.GetData());
+            DisplayInExcel(accounts.GetData(), students.GetData());
 
             Console.WriteLine("Success");
             Console.ReadKey();
@@ -24,25 +24,42 @@ namespace TestingExecl
 
         static void DisplayInExcel(IEnumerable<Account> accounts, IEnumerable<Student> students)
         {
-            var excelApp = new Excel.Application();
-
+            Excel.Application excelApp = new Microsoft.Office.Interop.Excel.Application();
             excelApp.Visible = true;
-            excelApp.Workbooks.Add();
-            Excel._Worksheet workSheet = (Excel.Worksheet)excelApp.ActiveSheet;
-            workSheet.Name = "Accounts";
-            excelApp.Worksheets.Add();
-            Excel._Worksheet workSheet1 = (Excel.Worksheet)excelApp.ActiveSheet;
-            workSheet1.Name = "Student";
+
+            //Create a new excel book and sheet
+            Excel.Workbook Workbooks;
+            Excel.Worksheet WorkSheet;
+            Excel.Worksheet WorkSheet1;
+            object misValue = System.Reflection.Missing.Value;
+
+            Workbooks = excelApp.Workbooks.Add();
+            WorkSheet = (Excel.Worksheet)Workbooks.Worksheets.Add();
+            WorkSheet.Name = "Accounts";
+            WorkSheet1 = (Excel.Worksheet)Workbooks.Worksheets.Add();
+            WorkSheet1.Name = "Student";
+         
             // Header Name Loading
-            HeaderRowLoading(workSheet,workSheet1);
+            HeaderRowLoading(WorkSheet, WorkSheet1);
 
             // incrementing the Row
             var row = 1;
             var row1 = 1;
 
             // Content Data Loading
-            row = ContentLoading(accounts, workSheet, row);
-            row1 = ContentStudentLoading(students, workSheet1, row1);
+            row = ContentLoading(accounts, WorkSheet, row);
+            row1 = ContentStudentLoading(students, WorkSheet1, row1);
+
+            // Footer Loading
+            FooterRowLoading(accounts, WorkSheet, row);
+
+            //SaveAndCloseExcel(excelApp, WorkBook);
+            string location = @"C:\Users\SpeeHive\source\repos\TestingExecl1\ExcelReport\test1.xls";
+            Workbooks.SaveAs(location);
+           
+            //Workbooks.Close(true);
+            //excelApp.Quit();
+
         }
 
         private static void HeaderRowLoading(Excel._Worksheet workSheet, Excel._Worksheet workSheet1)
@@ -72,9 +89,9 @@ namespace TestingExecl
             workSheet1.Cells[1, "D"] = "Height";
         }
 
-        private static int ContentLoading(IEnumerable<Account> accounts,Excel._Worksheet workSheet, int row)
+        private static int ContentLoading(IEnumerable<Account> accounts, Excel._Worksheet workSheet, int row)
         {
-           
+
             // data adding in Account
             foreach (var acct in accounts)
             {
@@ -91,35 +108,36 @@ namespace TestingExecl
                 workSheet.Cells[row, "J"] = acct.HRA;
                 workSheet.Cells[row, "K"] = acct.TotalSalary = acct.BasicSalary + acct.HRA;
                 workSheet.Cells[row, "L"] = acct.Expense;
-                workSheet.Cells[row, "M"] = acct.BalanceAmount=acct.TotalSalary - acct.Expense;
+                workSheet.Cells[row, "M"] = acct.BalanceAmount = acct.TotalSalary - acct.Expense;
                 workSheet.Cells[row, "N"] = acct.Comments;
 
-                    //background colour setting of account
+                //background colour setting of account
 
                 workSheet.Range["A1", "N1"].Interior.Color = XlRgbColor.rgbBurlyWood;
                 workSheet.Range["K2:K11"].Interior.Color = XlRgbColor.rgbCadetBlue;
                 workSheet.Cells[row, "J"].Font.Color = XlRgbColor.rgbGreen;
-                workSheet.Cells[row, "L"].Font.Color=XlRgbColor.rgbBlue;
+                workSheet.Cells[row, "L"].Font.Color = XlRgbColor.rgbBlue;
                 workSheet.Range["I:M"].NumberFormat = "0.00";//Decimal point intialiaztion
-              
+
                 if (acct.BalanceAmount > 0)
                 {
-                    workSheet.Cells[row,"M"].Interior.Color = XlRgbColor.rgbDarkOliveGreen;
+                    workSheet.Cells[row, "M"].Interior.Color = XlRgbColor.rgbDarkOliveGreen;
                 }
                 else {
                     workSheet.Cells[row, "M"].Interior.Color = XlRgbColor.rgbIndianRed;
                 }
                 workSheet.Cells[row, "N"].HorizontalAlignment =
                  Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter;
-             
+
                 workSheet.Columns["A:N"].AutoFit();
                 //workSheet.Columns[2].AutoFit();
                 //workSheet.Columns["N"].AutoFit();
-              
+
             }
             return row;
-            
+
         }
+
         private static int ContentStudentLoading(IEnumerable<Student> students, Excel._Worksheet workSheet1, int row1)
         {
 
@@ -134,12 +152,41 @@ namespace TestingExecl
             }
             // style setting for student
 
-            workSheet1.Range["A1","D1"].Interior.Color = XlRgbColor.rgbDeepPink;
+            workSheet1.Range["A1", "D1"].Interior.Color = XlRgbColor.rgbDeepPink;
             workSheet1.Cells.Range["A2:A6"].Font.Color = XlRgbColor.rgbDarkGreen;
             workSheet1.Cells.Range["C2:C6"].Font.Color = XlRgbColor.rgbDarkRed;
-          
-            workSheet1.Columns["A:D"].AutoFit();
+
+            workSheet1.Columns["A:N"].AutoFit();
             return row1;
         }
+
+        //Footer of Excell
+        private static void FooterRowLoading(IEnumerable<Account> accounts, Excel._Worksheet workSheet, int row)
+        {
+            var excelApp = new Excel.Application();
+
+            workSheet.Cells[row + 1, "J"] = "Total Amount";
+            workSheet.Cells[row + 1, "J"].Interior.Color = XlRgbColor.rgbCoral;
+            //workSheet.Columns[row+1,"J"].AutoFit();
+            Excel.Range xlRng = workSheet.Range["K:K"];//range intialization for sum
+            Excel.Range xlRng1 = workSheet.Range["L:L"];
+            Excel.Range xlRng2 = workSheet.Range["M:M"];
+            double sumResult = excelApp.WorksheetFunction.Sum(xlRng);// calling sum function 
+            double sumResult1 = excelApp.WorksheetFunction.Sum(xlRng1);
+            double sumResult2 = excelApp.WorksheetFunction.Sum(xlRng2);
+            workSheet.Cells[row + 1, "K"] = sumResult;                  //assigning cell to display sum
+            workSheet.Cells[row + 1, "K"].Font.Color = XlRgbColor.rgbDarkGreen;
+            workSheet.Cells[row + 1, "L"] = sumResult1;
+            workSheet.Cells[row + 1, "M"] = sumResult2;
+            workSheet.Cells[row + 1, "M"].Font.Color = XlRgbColor.rgbDarkRed;
+
+            //testing  calculation in console window
+
+            Console.WriteLine("The sum of Column K is {0}.", sumResult);
+            Console.WriteLine("The sum of Column L is {0}.", sumResult1);
+            Console.WriteLine("The sum of Column M is {0}.", sumResult2);
+
+        }
+
     }
 }
